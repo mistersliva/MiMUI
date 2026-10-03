@@ -426,10 +426,12 @@ impl Renderer {
                     depth_slice: None,
                     resolve_target: None,
                     ops: wgpu::Operations {
+                        // The clear bypasses the shader, so it needs the same
+                        // sRGB-to-linear conversion the fragment stage does.
                         load: wgpu::LoadOp::Clear(wgpu::Color {
-                            r: frame.clear.r as f64,
-                            g: frame.clear.g as f64,
-                            b: frame.clear.b as f64,
+                            r: srgb_to_linear(frame.clear.r) as f64,
+                            g: srgb_to_linear(frame.clear.g) as f64,
+                            b: srgb_to_linear(frame.clear.b) as f64,
                             a: frame.clear.a as f64,
                         }),
                         store: wgpu::StoreOp::Store,
@@ -801,6 +803,18 @@ fn sd_rounded_box(p: vec2<f32>, b: vec2<f32>, r: f32) -> f32 {
     return length(max(q, vec2<f32>(0.0, 0.0))) + min(max(q.x, q.y), 0.0) - r;
 }
 
+/// Colours are authored in sRGB, but the surface is an `*-srgb` format, so the
+/// hardware re-encodes whatever it is given. Handing it sRGB values would
+/// lighten every one of them; convert first so blending also happens in linear.
+/// The clear path in `render` uses the scalar [`srgb_to_linear`] for the same
+/// reason.
+fn to_linear(c: vec3<f32>) -> vec3<f32> {
+    let cut = vec3<f32>(0.04045);
+    let lo = c / 12.92;
+    let hi = pow((c + vec3<f32>(0.055)) / 1.055, vec3<f32>(2.4));
+    return select(hi, lo, c <= cut);
+}
+
 /// Maps a fragment back into shape space, undoing scale and rotation.
 fn to_shape_space(local: vec2<f32>, xform: vec4<f32>) -> vec2<f32> {
     var p = local;
@@ -841,7 +855,7 @@ fn fs_box(in: VertexOut) -> @location(0) vec4<f32> {
     if !inside_clip(px, in.clip) {
         discard;
     }
-    return vec4<f32>(in.color.rgb, in.color.a * coverage);
+    return vec4<f32>(to_linear(in.color.rgb), in.color.a * coverage);
 }
 
 @fragment
@@ -855,9 +869,16 @@ fn fs_image(in: VertexOut) -> @location(0) vec4<f32> {
     if alpha <= 0.001 {
         discard;
     }
-    return vec4<f32>(in.color.rgb, alpha);
+    return vec4<f32>(to_linear(in.color.rgb), alpha);
 }
 "#;
+
+/// Colours are authored in sRGB, but the surface is an `*-srgb` format, so the
+/// hardware re-encodes whatever it is given. Handing it sRGB values would
+/// lighten every one of them; convert first so blending also happens in linear.
+fn srgb_to_linear(c: f32) -> f32 {
+    if c <= 0.04045 { c / 12.92 } else { ((c + 0.055) / 1.055).powf(2.4) }
+}
 
 fn upload_texture(
     device: &wgpu::Device,

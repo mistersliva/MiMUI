@@ -6,7 +6,7 @@ use crate::input::{InputState, Key, Mods, MouseButton};
 use crate::state::UiState;
 use crate::style::Style;
 use crate::text::TextEngine;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use winit::application::ApplicationHandler;
 use winit::dpi::PhysicalSize;
 use winit::event::{ElementState, MouseButton as WMouseButton, MouseScrollDelta, WindowEvent};
@@ -382,16 +382,28 @@ impl<A: App> ApplicationHandler for Shell<A> {
             // Continuous mode: always schedule the next frame.
             self.redraw = true;
             event_loop.set_control_flow(ControlFlow::Poll);
-        }
-
-        if self.redraw {
-            // Clear first: `draw_frame` may raise the flag again for an
-            // animation, and that request has to survive into the next wait.
+        } else if self.redraw {
+            // Clear first: `draw_frame` may raise the flag again, and that
+            // request has to survive into the next wait.
             self.redraw = false;
             self.draw_frame();
+
+            if self.redraw {
+                // Something is still moving. On-demand redraw would otherwise
+                // block here and freeze the animation until the next event.
+                event_loop.set_control_flow(ControlFlow::WaitUntil(
+                    Instant::now() + Duration::from_millis(FRAME_MS),
+                ));
+            } else {
+                // Nothing left to draw; sleep until an event arrives.
+                event_loop.set_control_flow(ControlFlow::Wait);
+            }
         }
     }
 }
+
+/// Target frame interval used while an animation is running.
+const FRAME_MS: u64 = 16;
 
 fn to_button(b: WMouseButton) -> MouseButton {
     match b {
