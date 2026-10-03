@@ -147,10 +147,12 @@ Column class="card" anim="card_in 0.5s ease-out"
 Button "pulse" anim="pulse 1.2s infinite"
 ```
 
-The shorthand is `name duration [delay] [easing] [count] [alternate]`, e.g.
-`"pop 0.3s 0.1s ease-out 3 alternate"`. Positions in `anim!` are fractions of
-the duration, so `0.0` is the start, `1.0` the end and `0.5` halfway; a track
-may stop early to hold its last value.
+The shorthand is scanned token by token, so order does not matter:
+`anim="card_in 0.5s 0.06s ease-out"`, `anim="pulse 1.2s infinite"`,
+`anim="pop 0.3s 3 alternate"`. Times need a unit — a bare `0.5` is read as a
+repeat count, not a duration. Positions in `anim!` are fractions of the
+duration, so `0.0` is the start, `1.0` the end and `0.5` halfway; a track that
+stops early holds its last value for the rest of the run.
 
 Built-in recipes: `fade_in`, `fade_out`, `pop`, `zoom_in`, `slide_up`,
 `bounce_in`, `pulse`, `shake`, `spin`.
@@ -225,6 +227,15 @@ The tree is rebuilt every frame, so anything the *next* frame needs —
 positions, resolved styles, running animations, in-flight transitions — is
 looked up by element `id` in `UiState` rather than carried on a node. That is
 why `UiCtx` is cheap to throw away.
+
+## Documentation
+
+| | |
+| --- | --- |
+| [docs/reference.md](docs/reference.md) | every element, attribute, property, easing and built-in animation |
+| [docs/architecture.md](docs/architecture.md) | how a frame is built, and why it is shaped this way |
+| [docs/extending.md](docs/extending.md) | adding a widget, a property, an animatable; theming; fonts |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | working on MiMUI itself: conventions, tests, pitfalls |
 
 ## Building
 

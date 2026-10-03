@@ -294,8 +294,8 @@ impl TextEngine {
 
     /// Removes every face except those in `families`.
     ///
-    /// Only needed if the default filter is not what you want; see
-    /// [`drop_non_text_fonts`] for why it exists.
+    /// Only needed if the default filter is not what you want; see the module
+    /// notes on why non-text faces are dropped in the first place.
     pub fn retain_families(&mut self, families: &[&str]) {
         let wanted: Vec<String> = families.iter().map(|f| f.to_ascii_lowercase()).collect();
         let drop: Vec<_> = self

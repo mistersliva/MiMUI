@@ -77,6 +77,12 @@ impl WindowOptions {
         self.fps = fps;
         self
     }
+
+    /// Whether the user may resize the window.
+    pub fn resizable(mut self, on: bool) -> Self {
+        self.resizable = on;
+        self
+    }
     pub fn min_size(mut self, w: u32, h: u32) -> Self {
         self.min_width = w;
         self.min_height = h;

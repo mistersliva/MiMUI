@@ -4,7 +4,7 @@
 //!
 //! * **Transitions** — style a property with `transition: "background 0.2s"` and
 //!   any change to that property animates automatically.
-//! * **Keyframe animations** — named recipes registered with [`anim!`] and
+//! * **Keyframe animations** — named recipes registered with `anim!` and
 //!   triggered from a style with `animation: "pop 0.35s ease-out"`.
 //!
 //! ```
@@ -783,7 +783,7 @@ fn builtins() -> Vec<(&'static str, Keyframes)> {
     ]
 }
 
-/// Helper used by the [`anim!`] macro to turn a property identifier into an
+/// Helper used by the `anim!` macro to turn a property identifier into an
 /// [`AnimProp`], and a value expression into an [`AnimVal`].
 #[doc(hidden)]
 pub fn item(p: AnimProp, v: AnimVal) -> (AnimProp, AnimVal) {

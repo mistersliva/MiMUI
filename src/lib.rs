@@ -54,7 +54,7 @@ pub mod prelude {
     pub use crate::easing::Easing;
     pub use crate::geom::{Corners, Dim, Edges, Rect, Vec2};
     pub use crate::input::{Key, MouseButton};
-    pub use crate::state::UiState;
+    pub use crate::state::{UiState, Value};
     pub use crate::style::Style;
     pub use crate::ui;
     pub use crate::ctx::{Clock, DrawCmd, Frame, TextureRef, UiCtx};
