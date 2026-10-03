@@ -1,0 +1,37 @@
+[package]
+name = "mimui"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "An immediate-mode GUI library for Rust: tiny readable syntax, CSS-like styling, PNG/SVG images and declarative animations."
+license = "MIT"
+repository = "https://github.com/mistersliva/MiMUI"
+readme = "README.md"
+keywords = ["gui", "immediate-mode", "ui", "wgpu", "animation"]
+categories = ["gui", "rendering"]
+
+[workspace]
+members = ["mimui-macros"]
+
+[dependencies]
+mimui-macros = { path = "mimui-macros" }
+blake3 = "1.8"
+cosmic-text = "0.12"
+image = { version = "0.25", default-features = false, features = ["png", "jpeg", "webp", "gif"] }
+pollster = "1.0"
+resvg = { version = "0.48", optional = true }
+tiny-skia = { version = "0.12", optional = true }
+wgpu = "30.0"
+winit = "0.30"
+bytemuck = "1.25.2"
+
+[features]
+default = ["svg"]
+# Enables vector icons via `Svg "name";`
+svg = ["dep:resvg", "dep:tiny-skia"]
+
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
